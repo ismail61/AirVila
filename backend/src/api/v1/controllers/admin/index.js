@@ -1,0 +1,1 @@
+export { listingController } from './listing.controller';
