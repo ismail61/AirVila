@@ -62,17 +62,13 @@ const listingSchema = new mongoose.Schema({
         futureBookingMonths: Number,
         advanceNoticeBookingDays: Number
     },
-    guestRating: [{
-        cleanliness: Number,
-        behavior: Number,
-        accuracyOrCommitment: Number,
-        Location: Number,
-        Value: Number,
-        flexibleCheckIn: Number,
-        avg: Number,
-        message: String,
-        guestID: String
-    }],
+    guestRating: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Review',
+            index: true
+        }
+    ],
     rating: {
         cleanliness: Number,
         behavior: Number,
@@ -86,33 +82,34 @@ const listingSchema = new mongoose.Schema({
         base: NumberRequired,
         additionalGuestRent: Number,
         cleaningFee: Number,
-        carParking: Number,
-        calenderDate: [
-            {
-                price: Number,
-                date: Date,
-            }
-        ]
+        carParkingFee: Number,
     },
+    calenders: [
+        {
+            date: Date,
+            available: Boolean,
+            availabilityNote: String,
+            priceNote: String,
+            price: Number,
+        }
+    ],
     pets: {
         allowed: Boolean,
         additionalPetsRent: Number
     },
     discount: {
-        flat: Number,
-        threeDays: Number,
-        weekly: Number,
-        monthly: Number
+        threeDays: Number, // percentage
+        weekly: Number, // percentage
+        monthly: Number // percentage
     },
-    calenders: [
-        {
-            from: Date,
-            to: Date,
-        }
-    ],
-   /*  coupons: [{
-        code: String
-    }], */
+    coupons: [{
+        code: String,
+        discountType: {
+            type: String,
+            enum: ['FLAT', 'PERCENTAGE']
+        },
+        discount: Number
+    }],
     address: {
         houseNo: StringRequired,
         floor: StringRequired,
@@ -213,6 +210,8 @@ const listingSchema = new mongoose.Schema({
         highChair: BooleanDefaultFalse,
         tableCornerGuard: BooleanDefaultFalse,
         windowGuards: BooleanDefaultFalse,
+        washingMachine: BooleanDefaultFalse,
+        roomHeater: BooleanDefaultFalse,
     },
     heatingAndCoolingAmenities: {
         airConditioning: BooleanDefaultFalse,

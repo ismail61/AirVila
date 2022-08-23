@@ -3,3 +3,4 @@ export { createListingValidation } from './user/listing/create-listing.validatio
 export { updateListingValidation } from './user/listing/update-listing.validation';
 export { userUpdateInfoRequestValidation } from './user/account/update-info.validation';
 export { wishlistItemValidation } from './user/wishlist/item.validation';
+export { requestReservationValidation } from './user/reservation/request-reservation.validation';

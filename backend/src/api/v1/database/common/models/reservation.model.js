@@ -43,12 +43,15 @@ const reservationSchema = new mongoose.Schema({
         title: StringRequired,
         photo: StringRequired,
     },
+    discountCode: String,
+    voucherDiscountAmount: Number,
     price: {
         base: NumberRequired,
-        discount: Number,
         cleaningFee: Number,
-        carParking: Number,
+        carParkingFee: Number,
         additionalGuestRent: Number,
+        additionalPetsRent: Number,
+        serviceFee: NumberRequired,
         totalCost: NumberRequired
     },
     hostId: {

@@ -1,4 +1,4 @@
-import { createListing, findAllHomeListing, findAllListing, findListing, generateSearchQuery, updateListing } from "../../services/user";
+import { couponCodeAddedListing, couponCodeRemoveListing, createListing, findAllHomeListing, findAllListing, findListing, generateSearchQuery, updateListing } from "../../services/user";
 import { error, generateRandomId } from "../../utils"
 import { createListingValidation, updateListingValidation } from "../../validations";
 const Regex = /^[-\w\s]+$/;
@@ -59,8 +59,9 @@ function listingController() {
 
         getHostListing: async (req, res) => {
             const { _id } = req.user;
+            const { skip, limit } = req.params;
             //find all listing
-            const listing = await findAllListing({ userId: _id });
+            const listing = await findAllListing({ userId: _id }, skip, limit);
             return res.status(200).json(listing);
         },
 
@@ -71,6 +72,52 @@ function listingController() {
             const listing = await findListing(query);
             if (!listing) return error().resourceError(res, 'Listing Not Found!', 404);
             return res.status(200).json({ message: 'Already Have a Listing' });
+        },
+
+        couponCodeAdd: async (req, res) => {
+            const { listingId } = req.params;
+            const { code, discount, discountType } = req.body;
+
+            if (!discountType) return error().resourceError(res, 'Discount Type is Required', 422);
+            if (!code || !discount) return error().resourceError(res, 'Coupon Code or Discount Amount/Percentage is Required', 422);
+
+            //find a listing which code is already exists
+            const doesCodeExists = await findListing({
+                id: listingId,
+                'coupons.code': code
+            });
+            if (doesCodeExists) return error().resourceError(res, 'This Code is already exists in your coupons', 404);
+
+            // coupon code added in listing
+            const listing = await couponCodeAddedListing({ id: listingId }, req.body);
+            return res.status(200).json(listing);
+        },
+
+        couponCodeRemove: async (req, res) => {
+            const { listingId, couponId } = req.params;
+            // coupon code removed from listing
+            const listing = await couponCodeRemoveListing({ id: listingId }, couponId);
+            return res.status(200).json(listing);
+        },
+
+        couponCodeApplied: async (req, res) => {
+            const { listingId, } = req.params;
+            const { code } = req.body;
+            if (!code) return error().resourceError(res, 'Coupon Code is Required!', 422);
+
+            // find valid code
+            const listing = await findListing({
+                id: listingId,
+                'coupons.code': code
+            });
+            if (!listing) return error().resourceError(res, 'Coupon Code is Invalid!', 422);
+            let couponResult = null;
+            listing.coupons?.forEach(coupon => {
+                if (coupon.code === code) {
+                    couponResult = coupon;
+                }
+            })
+            return res.status(200).json(couponResult);
         },
 
 

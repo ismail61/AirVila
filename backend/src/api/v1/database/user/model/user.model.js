@@ -53,20 +53,14 @@ const userSchema = new mongoose.Schema({
     resetPasswordToken: String,
     resetPasswordTokenDate: Date,
     hostRating: [{
-        cleanliness: NumberRequired,
-        Communication: NumberRequired,
-        RespectToHouseRules: NumberRequired,
-        respectToOthersOrServants: NumberRequired,
-        timelyCheckOut: NumberRequired,
-        maintainingPropertyCare: NumberRequired,
-        avg: NumberRequired,
-        message: StringRequired,
-        hostID: StringRequired
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Review',
+        index: true
     }],
     rating: {
         cleanliness: Number,
-        Communication: Number,
-        RespectToHouseRules: Number,
+        communication: Number,
+        respectToHouseRules: Number,
         respectToOthersOrServants: Number,
         timelyCheckOut: Number,
         maintainingPropertyCare: Number,

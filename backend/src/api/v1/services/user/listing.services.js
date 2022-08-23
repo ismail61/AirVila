@@ -54,7 +54,7 @@ export const createListing = async (data, res) => {
 
 export const updateListing = async (query, data) => {
     try {
-        return await ListingModel.findOneAndUpdate(query, { $set: data })
+        return await ListingModel.findOneAndUpdate(query, { $set: data }, { new: true });
     } catch (err) {
         console.log(err);
     }
@@ -88,4 +88,20 @@ export const generateSearchQuery = (condition) => {
         query.title = new RegExp(title, 'i');
     }
     return query;
+}
+
+export const couponCodeAddedListing = async (query, coupon) => {
+    try {
+        return await ListingModel.findOneAndUpdate(query, { $push: { coupons: coupon } }, { new: true });
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+export const couponCodeRemoveListing = async (query, couponId) => {
+    try {
+        return await ListingModel.findOneAndUpdate(query, { $pull: { coupons: { _id: couponId } } }, { new: true });
+    } catch (err) {
+        console.log(err);
+    }
 }

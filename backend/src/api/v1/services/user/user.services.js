@@ -27,3 +27,10 @@ export const updateUser = async (query, data) => {
     }
 }
 
+export const getUsers = async (query, skip, limit) => {
+    try {
+        return await UserModel.find(query).skip(skip).limit(limit).lean();
+    } catch (err) {
+        console.log(err);
+    }
+}
