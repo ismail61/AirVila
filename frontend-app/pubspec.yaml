@@ -25,6 +25,9 @@ dependencies:
   badges: ^2.0.3
   expandable: ^5.0.1
   dartx: ^1.1.0
+  hive_flutter: ^1.1.0
+  google_fonts: ^3.0.1
+  fluttertoast: ^8.0.9
 
 dev_dependencies:
   flutter_test:
