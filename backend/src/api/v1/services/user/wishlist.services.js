@@ -1,8 +1,8 @@
-import { WishlistModel } from "../../database/user";
+import { WishlistModel } from '../../database/user';
 
 export const getWishlist = async (query) => {
     try {
-        return await WishlistModel.findOne(query).populate('items.listingId', 'title id _id  description price rating').lean();
+        return await WishlistModel.findOne(query).populate('items.listingId', 'title id _id  description photos price rating').lean();
     } catch (err) {
         console.log(err);
     }

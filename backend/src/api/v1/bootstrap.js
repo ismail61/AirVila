@@ -6,53 +6,59 @@ import { routes } from './routes'
 import Emitter from 'events';
 import { Server } from 'socket.io';
 import socketImplementation from './socket/socket';
+import { CloudinarySetup } from '../../config/cloudinary';
 
 const bootstrap = async () => {
 
-  const app = express();
+  try {
+    const app = express();
 
-  startingMiddleware(app);
-  await connectToDatabase();
+    startingMiddleware(app);
+    await connectToDatabase();
+    await CloudinarySetup();
 
-  routes(app);
+    routes(app);
 
-  // unexpected  router hit shows error
-  app.all('*', (req, res, next) => {
-    next(
-      res.status(404).json({ err: `Can't find ${req.originalUrl} on this server!` })
-    );
-  })
+    // unexpected  router hit shows error
+    app.all('*', (req, res, next) => {
+      next(
+        res.status(404).json({ err: `Can't find ${req.originalUrl} on this server!` })
+      );
+    })
 
-  const server = app.listen(config.app.port, () => {
-    console.log(`Server is running at ${config.app.port}`)
-  });
+    const server = app.listen(config.app.port, () => {
+      console.log(`Server is running at ${config.app.port}`)
+    });
 
-  //Event Emitter
-  const eventEmitter = new Emitter();
-  app.set('eventEmitter', eventEmitter);
+    //Event Emitter
+    const eventEmitter = new Emitter();
+    app.set('eventEmitter', eventEmitter);
 
-  //Socket IO
-  const io = new Server(server, {
-    cors: {
-      origin: "*"
-    }
-  })
+    //Socket IO
+    const io = new Server(server, {
+      cors: {
+        origin: "*"
+      }
+    })
 
-  socketImplementation(eventEmitter, io);
+    socketImplementation(eventEmitter, io);
 
-  process.on('unhandledRejection', err => {
-    console.log('UNHANDLED REJECTION! 💥 Shutting down...');
-    console.log(err.name, err.message);
-  });
+    process.on('unhandledRejection', err => {
+      console.log('UNHANDLED REJECTION! 💥 Shutting down...');
+      console.log(err.name, err.message);
+    });
 
-  process.on('SIGTERM', () => {
-    console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
-  });
+    process.on('SIGTERM', () => {
+      console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
+    });
 
-  process.on('uncaughtException', err => {
-    console.log('UNCAUGHT EXCEPTION! 💥 Shutting down...');
-    console.log(err.name, err.message);
-  });
+    process.on('uncaughtException', err => {
+      console.log('UNCAUGHT EXCEPTION! 💥 Shutting down...');
+      console.log(err.name, err.message);
+    });
+  } catch (error) {
+    console.log(error)
+  }
 };
 
 export { bootstrap };

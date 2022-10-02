@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 import { StringRequired } from '../../type/stringRequired';
 import { NumberRequired } from '../../type/numberRequired';
 import { BooleanDefaultFalse } from '../../type/BooleanDefaultFalse';
@@ -120,7 +120,9 @@ const listingSchema = new mongoose.Schema({
         city: StringRequired,
         state: StringRequired,
         zipCode: String,
-        country: StringRequired
+        country: StringRequired,
+        latitude: String,
+        longitude: String
     },
     guestsCapacity: {
         ...NumberRequired,
@@ -291,4 +293,4 @@ const listingSchema = new mongoose.Schema({
     },
 }, { timestamps: true });
 
-export default mongoose.model("Listing", listingSchema);
+export default mongoose.model('Listing', listingSchema);

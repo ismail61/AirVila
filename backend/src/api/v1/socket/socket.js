@@ -1,112 +1,125 @@
 function socketImplementation(eventEmitter, io) {
-    let orders = [];
-    let vendors = [];
-    let customers = [];
-    const addOrder = (orderId, socketId) => {
-        !orders?.some((order) => order.orderId === orderId) &&
-            orders?.push({ orderId, socketId });
+    let reservations = [];
+    let hosts = [];
+    let guests = [];
+    const addReservation = (reservationId, socketId) => {
+        !reservations?.some((reservation) => reservation.reservationId === reservationId) &&
+            reservations?.push({ reservationId, socketId });
     };
-    const addVendor = (vendorId, socketId) => {
-        !vendors?.some((vendor) => vendor.vendorId === vendorId) &&
-            vendors?.push({ vendorId, socketId });
+    const addHost = (hostId, socketId) => {
+        !hosts?.some((host) => host.hostId === hostId) &&
+            hosts?.push({ hostId, socketId });
     };
-    const addCustomer = (customerId, socketId) => {
-        !customers?.some((customer) => customer.customerId === customerId) &&
-            customers?.push({ customerId, socketId });
+    const addGuest = (guestId, socketId) => {
+        !guests?.some((guest) => guest.guestId === guestId) &&
+            guests?.push({ guestId, socketId });
     };
-    const removeOrder = (socketId) => {
-        orders = orders?.filter((order) => order.socketId !== socketId);
+    const removeReservation = (socketId) => {
+        reservations = reservations?.filter((reservation) => reservation.socketId !== socketId);
     };
-    const removeVendor = (socketId) => {
-        vendors = vendors?.filter((vendor) => vendor.socketId !== socketId);
+    const removeHost = (socketId) => {
+        hosts = hosts?.filter((host) => host.socketId !== socketId);
     };
-    const removeCustomer = (socketId) => {
-        customers = customers?.filter((customer) => customer.socketId !== socketId);
+    const removeGuest = (socketId) => {
+        guests = guests?.filter((guest) => guest.socketId !== socketId);
     };
-    const getOrder = (orderId) => {
-        return orders?.find((order) => order.orderId == orderId);
+    const getReservation = (reservationId) => {
+        return reservations?.find((reservation) => reservation.reservationId == reservationId);
     };
-    const getVendor = (vendorId) => {
-        return vendors?.find((vendor) => vendor.vendorId == vendorId);
+    const getHost = (hostId) => {
+        return hosts?.find((host) => host.hostId == hostId);
     };
-    const getCustomer = (customerId) => {
-        return customers?.find((customer) => customer.customerId == customerId);
+    const getGuest = (guestId) => {
+        return guests?.find((guest) => guest.guestId == guestId);
     };
 
-    io.on("connection", (socket) => {
+    io.on('connection', (socket) => {
 
-        socket.on("addOrder", (orderId) => {
-            if (orderId) {
-                addOrder(orderId, socket.id);
-                io.emit("getOrders", orders);
+        socket.on('addReservation', (reservationId) => {
+            if (reservationId) {
+                addReservation(reservationId, socket.id);
+                io.emit('getReservations', reservations);
             }
         });
 
-        socket.on("addVendor", (vendorId) => {
-            if (vendorId) {
-                addVendor(vendorId, socket.id);
-                io.emit("getVendors", vendors);
+        socket.on('addHost', (hostId) => {
+            if (hostId) {
+                addHost(hostId, socket.id);
+                io.emit('getHosts', hosts);
             }
         });
 
-        socket.on("addCustomer", (customerId) => {
-            if (customerId) {
-                addCustomer(customerId, socket.id);
-                io.emit("getCustomers", customers);
+        socket.on('addGuest', (guestId) => {
+            if (guestId) {
+                addGuest(guestId, socket.id);
+                io.emit('getGuests', guests);
             }
         });
 
-        socket.on("disconnect", () => {
-            removeOrder(socket.id);
-            removeVendor(socket.id);
-            removeCustomer(socket.id)
-            io.emit("getOrders", orders);
+        socket.on('disconnect', () => {
+            removeReservation(socket.id);
+            removeHost(socket.id);
+            removeGuest(socket.id)
+            io.emit('getReservations', reservations);
         });
     });
-    eventEmitter.on("orderUpdated", (data) => {
-        let order = getOrder(data._id);
-        io.to(order?.socketId).emit("orderUpdated", data);
+
+    // reservation
+    eventEmitter.on('reservationRequested', (data) => {
+        let host = getHost(data.hostId);
+        io.to(host?.socketId).emit('reservationRequested', data);
     });
-    eventEmitter.on("orderPaid", (data) => {
-        let order = getOrder(data._id);
-        io.to(order?.socketId).emit("orderPaid", data);
+
+    eventEmitter.on('reservationAccepted', (data) => {
+        let guest = getGuest(data.guestId);
+        io.to(guest?.socketId).emit('reservationAccepted', data);
     });
-    eventEmitter.on("orderPlaced", (data) => {
-        let vendor = getVendor(data.vendorId);
-        io.to(vendor?.socketId).emit("orderPlaced", data);
+
+    eventEmitter.on('reservationDeclined', (data) => {
+        let guest = getGuest(data.guestId);
+        io.to(guest?.socketId).emit('reservationDeclined', data);
     });
-    eventEmitter.on("orderRenewed", (data) => {
-        let vendor = getVendor(data.vendorId);
-        io.to(vendor?.socketId).emit("orderRenewed", data);
+
+    eventEmitter.on('reservationPaymentConfirmed', (data) => {
+        let host = getHost(data.hostId);
+        io.to(host?.socketId).emit('reservationPaymentConfirmed', data);
     });
-    eventEmitter.on("orderDeleted", (data) => {
-        let vendor = getVendor(data.vendorId);
-        io.to(vendor?.socketId).emit("orderDeleted", data);
+
+    eventEmitter.on('reservationCancelled', (data) => {
+        let host = getHost(data.hostId);
+        io.to(host?.socketId).emit('reservationCancelled', data);
     });
-    eventEmitter.on("orderReturned", (data) => {
-        let order = getOrder(data._id);
-        io.to(order?.socketId).emit("orderReturned", data);
+
+    // eventEmitter.on('reservationReturned', (data) => {
+    //     let reservation = getReservation(data.reservationId);
+    //     io.to(reservation?.socketId).emit('reservationReturned', data);
+    // });
+
+    // admin message
+    eventEmitter.on('admin-new-message', (data) => {
+        io.emit('admin-new-message', data);
     });
-    eventEmitter.on("orderReturnedDateAssign", (data) => {
-        let order = getOrder(data._id);
-        io.to(order?.socketId).emit("orderReturnedDateAssign", data);
+
+    // host message 
+    eventEmitter.on('host-new-message-form-guest', (data) => {
+        let host = getHost(data.hostId);
+        io.to(host?.socketId).emit('host-new-message-form-guest', data);
     });
-    eventEmitter.on("admin-new-message", (data) => {
-        io.emit("admin-new-message");
+
+    eventEmitter.on('host-new-message-form-admin', (data) => {
+        let host = getHost(data.hostId);
+        io.to(host?.socketId).emit('host-new-message-form-admin', data);
     });
-    eventEmitter.on("customer-new-message", (data) => {
-        let customer = getCustomer(data.customer_id);
-        io.to(customer?.socketId).emit("customer-new-message", data);
+
+    // guest message
+    eventEmitter.on('guest-new-message-from-host', (data) => {
+        let guest = getGuest(data.guestId);
+        io.to(guest?.socketId).emit('guest-new-message-from-host', data);
     });
-    eventEmitter.on("vendor-new-message", (data) => {
-        let vendor = getVendor(data.vendor_id);
-        io.to(vendor?.socketId).emit("vendor-new-message", data);
-    });
-    eventEmitter.on("bookDeleted", (data) => {
-        io.emit("bookDeleted");
-    });
-    eventEmitter.on("bookUpdated", (data) => {
-        io.emit("bookUpdated");
+
+    eventEmitter.on('guest-new-message-form-admin', (data) => {
+        let guest = getGuest(data.guestId);
+        io.to(guest?.socketId).emit('guest-new-message-form-admin', data);
     });
 }
 export default socketImplementation;

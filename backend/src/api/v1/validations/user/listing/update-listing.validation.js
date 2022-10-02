@@ -74,7 +74,7 @@ const updateListingValidation = ({
                 .messages({
                     "number.base": `Cleaning Fee should be type of Number`,
                 }),
-            carParking: Joi.number()
+            carParkingFee: Joi.number()
                 .messages({
                     "number.base": `Car Parking Fee should be type of Number`,
                 }),

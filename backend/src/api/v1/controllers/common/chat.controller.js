@@ -5,10 +5,10 @@ import {
     createChat,
     getAllChats,
     getSingleChat,
-} from "../../services/common";
-import { findUser } from "../../services/user";
-import { error } from "../../utils";
-let checkForValidMongoDbID = new RegExp("^[0-9a-fA-F]{24}$");
+} from '../../services/common';
+import { findUser } from '../../services/user';
+import { error } from '../../utils';
+let checkForValidMongoDbID = new RegExp('^[0-9a-fA-F]{24}$');
 
 function chatController() {
     return {
@@ -28,14 +28,14 @@ function chatController() {
                 const chat = await createChat({ messages: [{ ...req.body, sender: 'guest' }], guestId: req.user?._id, hostId });
                 //Event Emit for Socket IO
                 const eventEmitter = req.app.get('eventEmitter');
-                eventEmitter.emit('host-new-message-form-guest', { hostId });
+                eventEmitter.emit('host-new-message-form-guest', { hostId, guestId: req.user?._id });
                 return res.status(200).json(chat);
             }
 
             const chat = await addMessageInChat({ hostId, guestId: req.user?._id, admin: false }, { ...req.body, sender: 'guest' });
             //Event Emit for Socket IO
             const eventEmitter = req.app.get('eventEmitter');
-            eventEmitter.emit('host-new-message-form-guest', { hostId });
+            eventEmitter.emit('host-new-message-form-guest', { hostId, guestId: req.user?._id });
             return res.status(200).json(chat);
         },
         sendMessageToAdmin: async (req, res) => {
@@ -48,14 +48,14 @@ function chatController() {
                 const chat = await createChat({ messages: [{ ...req.body, sender: 'guest' }], guestId: req.user?._id, admin: true });
                 //Event Emit for Socket IO
                 const eventEmitter = req.app.get('eventEmitter');
-                eventEmitter.emit('admin-new-message-from-guest');
+                eventEmitter.emit('admin-new-message', { guestId: req.user?._id });
                 return res.status(200).json(chat);
             }
 
             const chat = await addMessageInChat({ admin: true, guestId: req.user?._id }, { ...req.body, sender: 'guest' });
             //Event Emit for Socket IO
             const eventEmitter = req.app.get('eventEmitter');
-            eventEmitter.emit('admin-new-message-from-guest');
+            eventEmitter.emit('admin-new-message', { guestId: req.user?._id });
             return res.status(200).json(chat);
         },
         getMessagesFromHosts: async (req, res) => {
@@ -88,7 +88,7 @@ function chatController() {
             const chat = await addMessageInChat({ guestId, hostId: req.user?._id, admin: false }, { ...req.body, sender: 'host' });
             //Event Emit for Socket IO
             const eventEmitter = req.app.get('eventEmitter');
-            eventEmitter.emit('guest-new-message-from-host', { guestId });
+            eventEmitter.emit('guest-new-message', { guestId, hostId: req.user?._id });
             return res.status(200).json(chat);
         },
         sendMessageToAdminFromHost: async (req, res) => {
@@ -101,14 +101,14 @@ function chatController() {
                 const chat = await createChat({ messages: [{ ...req.body, sender: 'host' }], hostId: req.user?._id, admin: true });
                 //Event Emit for Socket IO
                 const eventEmitter = req.app.get('eventEmitter');
-                eventEmitter.emit('admin-new-message-from-host');
+                eventEmitter.emit('admin-new-message', { hostId: req.user?._id });
                 return res.status(200).json(chat);
             }
 
             const chat = await addMessageInChat({ admin: true, hostId: req.user?._id }, { ...req.body, sender: 'host' });
             //Event Emit for Socket IO
             const eventEmitter = req.app.get('eventEmitter');
-            eventEmitter.emit('admin-new-message-from-host');
+            eventEmitter.emit('admin-new-message');
             return res.status(200).json(chat);
         },
         getMessagesFromGuests: async (req, res) => {

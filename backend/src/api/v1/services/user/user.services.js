@@ -1,6 +1,7 @@
 
-import { globalErrorHandler } from "../../utils";
-import { UserModel } from "../../database/user";
+import { globalErrorHandler } from '../../utils';
+import { UserModel } from '../../database/user';
+import { createWallet } from './wallet.services';
 
 export const findUser = async (query) => {
     try {
@@ -12,7 +13,16 @@ export const findUser = async (query) => {
 
 export const createUser = async (data, res) => {
     try {
-        return await UserModel.create(data)
+        const user = await UserModel.create(data);
+        // create transactions wallet
+        await createWallet({
+            userId: user?._id
+        }, res);
+        await createWallet({
+            userId: user?._id,
+            userType: 'host'
+        }, res);
+        return user;
     } catch (err) {
         console.log(err);
         globalErrorHandler(err, res);

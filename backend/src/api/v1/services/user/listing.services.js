@@ -1,6 +1,6 @@
 
-import { globalErrorHandler } from "../../utils";
-import { ListingModel } from "../../database/common";
+import { globalErrorHandler } from '../../utils';
+import { ListingModel } from '../../database/common';
 
 export const findListing = async (query) => {
     try {

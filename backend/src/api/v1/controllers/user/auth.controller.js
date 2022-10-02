@@ -24,6 +24,10 @@ function authController() {
             const validation = userSignUpValidation(req.body);
             if (validation.error) return error().resourceError(res, validation.error?.details[0].message, 422);
 
+            if (!req.file) return error().resourceError(res, 'Image is Required!', 422);
+            if (req.fileExtensionValidationError) return error().resourceError(res, 'Only .png, .jpg, .gif and .jpeg format allowed!', 415);
+            if (req.file?.size >= multerConfig.maxFileSize) return error().resourceError(res, 'Image size mus lower than 3 MB', 409);
+
             // De-Structure data from req.body
             const { email, phone, identityNumber } = req.body;
 
@@ -61,6 +65,10 @@ function authController() {
             const validation = userSignUpValidation(req.body);
             if (validation.error) return error().resourceError(res, validation.error?.details[0].message, 422);
 
+            if (!req.file) return error().resourceError(res, 'Image is Required!', 422);
+            if (req.fileExtensionValidationError) return error().resourceError(res, 'Only .png, .jpg, .gif and .jpeg format allowed!', 415);
+            if (req.file?.size >= multerConfig.maxFileSize) return error().resourceError(res, 'Image size mus lower than 3 MB', 409);
+
             // De-Structure data from req.body
             const { email, phone, identityNumber, otp, password } = req.body;
 
@@ -89,11 +97,20 @@ function authController() {
             //password hash using bcrypt
             const hashPassword = await generatePasswordHash(password);
 
+            const image_upload = await cloudinary.v2.uploader.upload(req.file?.path, { folder: `airvila/profile/${new Date().getFullYear()}/${new Date().getMonth()}/${new Date().getDate()}`, use_filename: true });
+            if (!image_upload?.secure_url) return error().resourceError(res, 'Image Saved Failed . Please try again', 500);
+
+            const image = {
+                public_id: image_upload?.public_id,
+                url: image_upload?.secure_url
+            };
+
             // save into mongo db
             await createUser({
                 id: `UID${id}`,
                 ...refactor_data,
-                password: hashPassword
+                password: hashPassword,
+                image
             }, res);
             return res.status(201).json({ message: 'Sign Up Successful' });
         },

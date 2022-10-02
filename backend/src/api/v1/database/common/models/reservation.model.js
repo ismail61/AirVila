@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 import { StringRequired } from '../../type/stringRequired';
 import { NumberRequired } from '../../type/numberRequired';
 
@@ -10,21 +10,45 @@ const reservationSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['Requested', 'Accepted', 'Declined', 'Completed'],
+        enum: ['Requested', 'Accepted', 'Declined', 'Completed', 'Cancelled'],
         default: 'Requested'
     },
-    paymentStatus: {
-        type: String,
-        enum: ['Pending', 'Confirmed', 'Failed'],
-        default: 'Pending'
+    cancelledReason: String,
+    payment: {
+        status: {
+            type: String,
+            enum: ['Pending', 'Confirmed', 'Failed'],
+            default: 'Pending'
+        },
+        customerInfo: {
+            name: String,
+            email: String,
+            phone: String,
+            address: String,
+        },
+        info: {
+            total_amount: Number,
+            tran_id: String,
+            currency: String,
+            emi_option: String,
+        }
     },
     requestedPendingDate: {
         type: Date,
         default: Date.now,
     },
+    dates: [{
+        date: Date,
+        price: Number,
+    }],
+    cancelledDates: [{
+        date: Date,
+        price: Number,
+    }],
     requestedAcceptedDate: Date,
     paymentConfirmedDate: Date,
     reservationCompletedDate: Date,
+    reservationCancelledDate: Date,
     info: {
         checkInTime: {
             type: Date,
@@ -35,7 +59,7 @@ const reservationSchema = new mongoose.Schema({
             required: true
         },
         guests: {
-            adult: NumberRequired,
+            adult: Number,
             child: Number
         },
         pets: Number,
@@ -43,16 +67,11 @@ const reservationSchema = new mongoose.Schema({
         title: StringRequired,
         photo: StringRequired,
     },
-    discountCode: String,
-    voucherDiscountAmount: Number,
     price: {
-        base: NumberRequired,
         cleaningFee: Number,
         carParkingFee: Number,
         additionalGuestRent: Number,
         additionalPetsRent: Number,
-        serviceFee: NumberRequired,
-        totalCost: NumberRequired
     },
     hostId: {
         ...StringRequired,
@@ -66,6 +85,22 @@ const reservationSchema = new mongoose.Schema({
         ...StringRequired,
         index: true
     },
+    commission: Number,
+    totalBasePrice: NumberRequired,
+    daysDiscount: Number,
+    totalDiscount: Number,
+    totalDiscount: Number,
+    totalCost: NumberRequired, // without commission & gift price
+    totalUtilityPrice: Number,
+    giftDiscount: Number,
+    discountCode: String,
+    voucherDiscount: Number,
+    giftDiscount: Number,
+    grandTotal: NumberRequired,
+    daysDiscount: {
+        type: String,
+        amount: Number
+    }
 }, { timestamps: true });
 
-export default mongoose.model("Reservation", reservationSchema);
+export default mongoose.model('Reservation', reservationSchema);

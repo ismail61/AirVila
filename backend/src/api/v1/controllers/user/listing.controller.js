@@ -34,7 +34,7 @@ function listingController() {
         },
 
         updateListing: async (req, res) => {
-            const { id } = req.params;
+            const { listingId } = req.params;
 
             // De-Structure data from req.body
             const { title } = req.body;
@@ -45,11 +45,11 @@ function listingController() {
             if (validation.error) return error().resourceError(res, validation.error?.details[0].message, 422);
 
             //find a listing is assigned to the same title
-            const doesTitleMatch = await findListing({ title, id: { $ne: id } });
+            const doesTitleMatch = await findListing({ title, id: { $ne: listingId } });
             if (doesTitleMatch) return error().resourceError(res, 'Title already exists. Please choose a different Title', 409);
 
             // update listing
-            const updatedListing = await updateListing({ id }, req.body);
+            const updatedListing = await updateListing({ id: listingId }, req.body);
             if (!updatedListing) return error().resourceError(res, 'Listing Updated Failed!', 404);
 
             // Review request of Listing
@@ -72,6 +72,14 @@ function listingController() {
             const listing = await findListing(query);
             if (!listing) return error().resourceError(res, 'Listing Not Found!', 404);
             return res.status(200).json({ message: 'Already Have a Listing' });
+        },
+
+        getHostSingleListingById: async (req, res) => {
+            const { listingId } = req.params;
+            //find a listing
+            const listing = await findListing({ id: listingId });
+            if (!listing) return error().resourceError(res, 'Listing Not Found!', 404);
+            return res.status(200).json(listing);
         },
 
         couponCodeAdd: async (req, res) => {
@@ -100,6 +108,26 @@ function listingController() {
             return res.status(200).json(listing);
         },
 
+        // Guest
+        getGuestListing: async (req, res) => {
+            const { skip, limit, } = req.query;
+            const query = generateSearchQuery(req.query);
+            //find all listing
+            const listing = await findAllHomeListing({
+                ...query,
+                status: 'Listed'
+            }, skip, limit);
+            return res.status(200).json(listing);
+        },
+
+        getGuestSingleListing: async (req, res) => {
+            const { listingId } = req.params;
+            //find a listing
+            const listing = await findListing({ id: listingId });
+            if (!listing) return error().resourceError(res, 'Listing Not Found!', 404);
+            return res.status(200).json(listing);
+        },
+
         couponCodeApplied: async (req, res) => {
             const { listingId, } = req.params;
             const { code } = req.body;
@@ -118,27 +146,6 @@ function listingController() {
                 }
             })
             return res.status(200).json(couponResult);
-        },
-
-
-        // Guest
-        getGuestListing: async (req, res) => {
-            const { skip, limit, } = req.query;
-            const query = generateSearchQuery(req.query);
-            //find all listing
-            const listing = await findAllHomeListing({
-                ...query,
-                status: 'Listed'
-            }, skip, limit);
-            return res.status(200).json(listing);
-        },
-
-        getGuestSingleListing: async (req, res) => {
-            const { id } = req.params;
-            //find a listing
-            const listing = await findListing({ id });
-            if (!listing) return error().resourceError(res, 'Listing Not Found!', 404);
-            return res.status(200).json(listing);
         },
     }
 }
